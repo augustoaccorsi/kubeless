@@ -5,8 +5,8 @@ os:
   - osx
 
 go:
-  - 1.7
-  - 1.8
+  - '1.7'
+  - '1.8'
 
 services:
   - docker
@@ -64,7 +64,7 @@ before_deploy:
 deploy:
   provider: releases
   api_key:
-    secure: "daSVcUjHGO5L1SlyX3+GOz/Hv4KqkC/ObdRAbr7n7bvZUQewN5ll9Q5z5gvOI9z+zY9nnYFVppaOLfdWGjSldxjepwdHFB0F/oBXVwD+l7WOWacpq8+0+Zm71gG31YMl9ImkgmFll9WwXcG/2MLSGUsyBInGLzyRT0l5OhG6PNWLO3p7YZBKr9ihF3nxeRucfwn2uMUuyVnlEyBCyqmpxeKMNK3J9FY9j3jTmTmRQCBc9UEGGcX2p7R+LtLEvg/nxllVZyHQYc6UhuXWC6imx1mo6NAsVNSvbgJ0ufWrwcd+43XmU5eO8IPMlkb/EVgzp40XWoMrsxQZLEhnkLuApLFMdgn3ioJynBmtYiP3mQZ67Dt5zQiA7+UW/D+1CVjb7hVTzk76Vm4oEEq1KUs2xnA+kaUKprTLrlW4EusiSqKPZWG+hrqlC6VGYTSpQBtx9Hgo5yHZ0r5zoNCrXy3ISsCf8ublH+eiQ5tQ4pFD42AlLKGOQEpL6cvu2zl7+KZfWDqXG8dnjni7aguuPEdXnUm/bsv7JWKwFFV8CHfmBuWruU+VG1iVvSOmATlwQgb72ZsE+bJw5nFWTbrsVeK+hXSBk1tiWWDJzYEC9e81hFKxw8ltPHnG+dos941FXjNVG81L6TcuCgc42Ca4Kf7ICirjdmCKT3e7FW60IFw8SLM="
+    secure: "ajLd8V/afkBM6a8RVaRQxui95Kpqx7jjPuZeO4D7re/wH1jODT/qswsCMXNG6nlq334nce0HoIW7zGVME1RaC8+nT/PIJG3I/k9oQg9AvUJqILzFNBaj2hg07DNzzDpQiNER8YTjMliAQhlUseTEYEAl1pfBSbZFWn6WV0SqFEji3ZhO5SdEMGmC6RzBZ21/3sBr+h6c6HG5Wb+qXr+Im83/+/wke3M8qKsSgsalJ0fpbonubicq4AzprNIBl6QZi77LZiqQCnPSD1Sop92p8wu5LgJ6CLEK3tOpFTZcJ8FYSAhBp0ipZ4adNTwZgwcXFd9FcSm10whD3WM5pgzAhtq0TB9QVbOdLL6ppANgAlFuIITsToxlAohyt2GwJPXb3mppG/m/1hGyXiy3y1uURn2x7kRR20uBtRgkUqwlKdKUlD57I4f+681oVwxcKvEr07h4l7gg4EtbmbnQHzGSFXhZ4sF2z6iqBG0I6gaQT+hJPyQIrpryGWqQAQt9YZGF/AiUxndQrIaQ8AK4IemKRlFYkTqrB2GLQR1wlSSQejOoZ4157QfgCdNKk1NxqRWDJLPOHHAWTiU21msKBlhDkiga2xrouS849HK+6SyYUKall/Q0XxmCFEo5JsBppYhWrWGzToXuCK1p+AfGUlR3YeAm+wKg3ivELdb+qRGP9ro="
   file_glob: true
   file:
     - kubeless-${TRAVIS_TAG}.yaml
