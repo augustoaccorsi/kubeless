@@ -27,7 +27,7 @@ kafka_server = '%s.%s:9092' % (kafka_svc, kafka_namespace)
 
 group = mod_name + func_handler
 
-mod = imp.load_source('function', '/kubeless/%s.py' % mod_name)
+mod = imp.load_source('function', '/kubeless/function/%s.py' % mod_name)
 func = getattr(mod, func_handler)
 
 func_hist = prom.Histogram('function_duration_seconds',

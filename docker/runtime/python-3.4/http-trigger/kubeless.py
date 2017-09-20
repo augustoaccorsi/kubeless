@@ -7,7 +7,7 @@ import bottle
 import prometheus_client as prom
 
 mod = imp.load_source('function',
-                      '/kubeless/%s.py' % os.getenv('MOD_NAME'))
+                      '/kubeless/function/%s.py' % os.getenv('MOD_NAME'))
 func = getattr(mod, os.getenv('FUNC_HANDLER'))
 
 app = application = bottle.app()

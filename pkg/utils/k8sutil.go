@@ -62,6 +62,7 @@ const (
 	busybox        = "busybox@sha256:be3c11fdba7cfe299214e46edc642e09514dbb9bbefcd0d3836c05a1e0cd0642"
 	pubsubFunc     = "PubSub"
 	schedFunc      = "Scheduled"
+	gitSync        = "gcr.io/google-containers/git-sync-amd64@sha256:904833aedf3f14373e73296240ed44d54aecd4c02367b004452dfeca2465e5bf"
 )
 
 type runtimeVersion struct {
@@ -285,12 +286,7 @@ func EnsureK8sResources(funcObj *spec.Function, client kubernetes.Interface) err
 		},
 	}
 
-	err := ensureFuncConfigMap(client, funcObj, or)
-	if err != nil {
-		return err
-	}
-
-	err = ensureFuncService(client, funcObj, or)
+	err := ensureFuncService(client, funcObj, or)
 	if err != nil {
 		return err
 	}
@@ -698,43 +694,6 @@ func splitHandler(handler string) (string, string, error) {
 	return str[0], str[1], nil
 }
 
-func ensureFuncConfigMap(client kubernetes.Interface, funcObj *spec.Function, or []metav1.OwnerReference) error {
-	modName, _, err := splitHandler(funcObj.Spec.Handler)
-	if err != nil {
-		return err
-	}
-
-	fileName := modName
-	_, depName, fileName, err := GetFunctionData(funcObj.Spec.Runtime, funcObj.Spec.Type, modName)
-	if err != nil {
-		return err
-	}
-
-	configMap := &v1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:            funcObj.Metadata.Name,
-			Labels:          funcObj.Metadata.Labels,
-			OwnerReferences: or,
-		},
-		Data: map[string]string{
-			"handler": funcObj.Spec.Handler,
-			fileName:  funcObj.Spec.Function,
-			depName:   funcObj.Spec.Deps,
-		},
-	}
-
-	_, err = client.Core().ConfigMaps(funcObj.Metadata.Namespace).Create(configMap)
-	if err != nil && k8sErrors.IsAlreadyExists(err) {
-		data, err := json.Marshal(configMap)
-		if err != nil {
-			return err
-		}
-		_, err = client.Core().ConfigMaps(funcObj.Metadata.Namespace).Patch(configMap.Name, types.StrategicMergePatchType, data)
-	}
-
-	return err
-}
-
 func ensureFuncService(client kubernetes.Interface, funcObj *spec.Function, or []metav1.OwnerReference) error {
 	svc := &v1.Service{
 		ObjectMeta: metav1.ObjectMeta{
@@ -840,11 +799,7 @@ func ensureFuncDeployment(client kubernetes.Interface, funcObj *spec.Function, o
 	dpm.Spec.Template.Spec.Volumes = append(dpm.Spec.Template.Spec.Volumes, v1.Volume{
 		Name: funcObj.Metadata.Name,
 		VolumeSource: v1.VolumeSource{
-			ConfigMap: &v1.ConfigMapVolumeSource{
-				LocalObjectReference: v1.LocalObjectReference{
-					Name: funcObj.Metadata.Name,
-				},
-			},
+			EmptyDir: &v1.EmptyDirVolumeSource{},
 		},
 	})
 	if len(dpm.Spec.Template.Spec.Containers) == 0 {
@@ -906,6 +861,9 @@ func ensureFuncDeployment(client kubernetes.Interface, funcObj *spec.Function, o
 		dpm.Spec.Template.Spec.Containers[0].LivenessProbe = livenessProbe
 	}
 
+	//add git-sync sidecar to the func deployment
+	addSidecarToFuncDeployment(dpm, funcObj.Metadata.Name, funcObj.Metadata.Namespace)
+
 	_, err = client.Extensions().Deployments(funcObj.Metadata.Namespace).Create(dpm)
 	if err != nil && k8sErrors.IsAlreadyExists(err) {
 		data, err := json.Marshal(dpm)
@@ -931,6 +889,38 @@ func ensureFuncDeployment(client kubernetes.Interface, funcObj *spec.Function, o
 	}
 
 	return err
+}
+
+func addSidecarToFuncDeployment(dpm *v1beta1.Deployment, name, ns string) {
+	dpm.Spec.Template.Spec.Containers = append(dpm.Spec.Template.Spec.Containers, v1.Container{
+		Name:  "git-sync",
+		Image: gitSync,
+		Env: []v1.EnvVar{
+			{
+				Name:  "GIT_SYNC_REPO",
+				Value: fmt.Sprintf("https://gitlab.kubeless.svc.cluster.local/%s/%s", ns, name),
+			},
+			{
+				Name:  "GIT_SYNC_BRANCH",
+				Value: "master",
+			},
+			{
+				Name:  "GIT_SYNC_WAIT",
+				Value: "10",
+			},
+			{
+				Name:  "GIT_SYNC_DEST",
+				Value: "function",
+			},
+		},
+		VolumeMounts: []v1.VolumeMount{
+			{
+				Name:      name,
+				MountPath: "/git",
+			},
+		},
+		ImagePullPolicy: v1.PullIfNotPresent,
+	})
 }
 
 func ensureFuncJob(client kubernetes.Interface, funcObj *spec.Function, or []metav1.OwnerReference) error {

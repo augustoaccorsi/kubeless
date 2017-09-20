@@ -19,7 +19,7 @@ require 'sinatra'
 $stdout.sync = true
 MOD_NAME = ENV['MOD_NAME']
 FUNC_HANDLER = ENV['FUNC_HANDLER']
-MOD_ROOT_PATH = ENV.fetch('MOD_ROOT_PATH', '/kubeless/')
+MOD_ROOT_PATH = ENV.fetch('MOD_ROOT_PATH', '/kubeless/function/')
 MOD_PATH = "#{File.join(MOD_ROOT_PATH, MOD_NAME)}.rb"
 
 begin
