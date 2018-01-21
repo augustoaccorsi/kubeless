@@ -3,6 +3,7 @@ package main
 import (
 	"os"
 	"os/signal"
+	"strconv"
 	"strings"
 
 	"github.com/Shopify/sarama"
@@ -35,7 +36,11 @@ func main() {
 			logrus.Fatal(err)
 		}
 	}()
-	consumer, err := master.ConsumePartition(topic, 0, sarama.OffsetOldest)
+	p, err := strconv.Atoi(partition)
+	if err != nil {
+		logrus.Fatal(err)
+	}
+	consumer, err := master.ConsumePartition(topic, p, sarama.OffsetOldest)
 	if err != nil {
 		logrus.Fatal(err)
 	}
