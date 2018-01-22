@@ -202,7 +202,7 @@ func (c *TriggerController) processItem(key string) error {
 }
 
 // ensureK8sResources creates/updates k8s objects (deploy, svc, configmap) for the function
-func (c *TriggerController) ensureTriggerResources(triggerObj  *kubelessApi.Trigger, funcObj *kubelessApi.Function) error {
+func (c *TriggerController) ensureTriggerResources(triggerObj *kubelessApi.Trigger, funcObj *kubelessApi.Function) error {
 	if len(funcObj.ObjectMeta.Labels) == 0 {
 		funcObj.ObjectMeta.Labels = make(map[string]string)
 	}

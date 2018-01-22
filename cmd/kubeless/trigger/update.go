@@ -127,5 +127,5 @@ func init() {
 	updateCmd.Flags().StringP("schedule", "", "", "Specify schedule in cron format for scheduled function")
 	updateCmd.Flags().Bool("trigger-http", false, "Deploy a http-based function to Kubeless")
 	updateCmd.Flags().StringP("function-name", "", "", "Name of the function to be associated with trigger")
-	updateCmd.MarkFlagRequired("function-name")	
+	updateCmd.MarkFlagRequired("function-name")
 }
